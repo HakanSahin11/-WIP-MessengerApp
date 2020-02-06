@@ -11,6 +11,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authentication;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 
 namespace API_Setup_User_config.Controllers
 {
@@ -25,6 +26,10 @@ namespace API_Setup_User_config.Controllers
 
         bool dbSetup(string user, string pass, string usage, string email, string match, int? id)
         {
+            // sets the Mongodb registry to turn on "IgnoreExtraElements", so the usage of multiple combined classes can be used to sterilize the data from MongoDB, used for the class "UserClass"
+            var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
+            ConventionRegistry.Register("IgnoreExtraElements", conventionPack, type => true);
+
             IMongoDatabase client = new MongoClient($"mongodb://{user}:{pass}@localhost:27017").GetDatabase("Virksomhed");
             
             var result = true;
@@ -124,6 +129,7 @@ namespace API_Setup_User_config.Controllers
 
         public void bsonSection(int id, string section, string input, IMongoCollection<BsonDocument> Collection)
         {
+            //sends the ban timer to the mongodb "LoginBan" - Needs to be set up
             var filter = Builders<BsonDocument>.Filter.Eq("_id", id);
             var update = Builders<BsonDocument>.Update.Set(section, input);
             Collection.UpdateOne(filter, update);
@@ -175,7 +181,6 @@ namespace API_Setup_User_config.Controllers
                 dbSetup("GateKeeper", "silvereye", "friendsList", null, null, id);
                 return Ok($"{DatabaseGetOne.FirstName} {DatabaseGetOne.LastName}");
             }
-            
         }
 
         // PUT: api/User/5
