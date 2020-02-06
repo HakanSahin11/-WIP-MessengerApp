@@ -10,9 +10,11 @@ using MongoDB.Driver.Linq;
 using System.Text.Json;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authentication;
+using MongoDB.Bson;
 
 namespace API_Setup_User_config.Controllers
 {
+    /// Set up Bson for login ban on API lvl
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -21,9 +23,10 @@ namespace API_Setup_User_config.Controllers
         public UserClass DatabaseGetOne { get;set; }
         public SaltClass DatabasePost { get; set; }
 
-        bool dbSetup(string user, string pass, string usage, int? value, string match)
+        bool dbSetup(string user, string pass, string usage, string email, string match, int? id)
         {
             IMongoDatabase client = new MongoClient($"mongodb://{user}:{pass}@localhost:27017").GetDatabase("Virksomhed");
+            
             var result = true;
             switch (usage)
             {
@@ -39,45 +42,103 @@ namespace API_Setup_User_config.Controllers
                     break;
 
                 case "getOne":
-
+                    //should be unused atm, other than when requesting specific
                     var usageQuery =
                        from c in client.GetCollection<UserClass>(UserClass.Name).AsQueryable()
-                       where c._id == value
+                       where c.Email == email
                        select c;
 
                     foreach (UserClass output in usageQuery)
                     {
                         DatabaseGetOne = output;
-                    }
-            
+                    }            
                     break;
 
                 case "post":
-                    var postUsageQuery = from c in client.GetCollection<SaltClass>(SaltClass.Name).AsQueryable()
-                                     where c._id == value
-                                     select c;
+                    DateTime LoginBan = DateTime.Now;
+                    dbSetup("GateKeeper", "silvereye", "get", null, null, null);
 
+                    bool emailSearch = false;
+                    foreach (var items in DatabaseGet)
+                    {
+                        foreach (var item in items)
+                        {
+                            if (item.Email.Contains(email))
+                            {
+                                DatabaseGetOne = item;
+                                emailSearch = true;
+                                LoginBan = Convert.ToDateTime(DatabaseGetOne.LoginBan);
+                            }
+                        }
+                    }
+
+                    //   var test2 = DatabaseGet.Any(x => x.Any(y => y.Email == email)); Test version work in progress, gives bool so far instead if list
+                    /*
+                    var data = from e in DatabaseGet.AsParallel().WithDegreeOfParallelism(1)     gives whole object?
+                               where e.Any(b => b.Email.Contains(email)) 
+                               select e;
+                                
+                    */
+
+
+                    if (emailSearch == false ||  LoginBan > DateTime.Now)
+                    {
+                        return false;
+                    }
+                    var postUsageQuery = from c in client.GetCollection<SaltClass>(SaltClass.Name).AsQueryable()
+                                     where c._id == DatabaseGetOne._id
+                                     select c;
+                    
                     foreach (SaltClass output in postUsageQuery)
                     {
                         DatabasePost = output;
                     }
-                    dbSetup("GateKeeper", "silvereye", "getOne", value, null);
-                    if (
-                    Sha256.Sha256Hash(match, DatabasePost.Salt) != DatabaseGetOne.Password)
+                    //     dbSetup("GateKeeper", "silvereye", "getOne", value, null);
+                    if (Sha256.Sha256Hash(match, DatabasePost.Salt) != DatabaseGetOne.Password)
                     {
+                       /*
+                            banTime += banTime;
+                            DateTime banTimer = DateTime.Now.AddMinutes(banTime);
+                            bsonSection(DatabaseGetOne._id, "LoginBan", Convert.ToString(banTimer), client.GetCollection<BsonDocument>(UserClass.Name));
+                           */
                         result = false;
                     }
                     break;
+
+                case "friendsList":
+                    var friendsListNames =
+                      from c in client.GetCollection<UserClass>(UserClass.Name).AsQueryable()
+                      where c._id == id
+                      select c;
+
+                    foreach (UserClass output in friendsListNames)
+                    {
+                        DatabaseGetOne = output;
+                    }
+                    break;
             }
+
+
             return result;
         }
+
+        public void bsonSection(int id, string section, string input, IMongoCollection<BsonDocument> Collection)
+        {
+            var filter = Builders<BsonDocument>.Filter.Eq("_id", id);
+            var update = Builders<BsonDocument>.Update.Set(section, input);
+            Collection.UpdateOne(filter, update);
+
+            
+        }
+
+
         // GET: api/User
         [HttpGet]
         public ActionResult Get()
         {
             try
             {
-                dbSetup("GateKeeper","silvereye", "get", null, null);
+                dbSetup("GateKeeper","silvereye", "get", null, null, null);
                 return Ok(DatabaseGet);
             }
             catch (Exception e)
@@ -86,11 +147,11 @@ namespace API_Setup_User_config.Controllers
             }
         }
 
-        // GET: api/User/5
-        [HttpGet("{id}", Name = "Get")]
-        public ActionResult Get(int id)
+        // GET: api/User/email
+        [HttpGet("{email}", Name = "Get")]
+        public ActionResult Get(string email)
         {
-            dbSetup("GateKeeper", "silvereye", "getOne", id, null);
+            dbSetup("GateKeeper", "silvereye", "getOne", email, null, null);
             return Ok(DatabaseGetOne);
         }
 
@@ -98,12 +159,23 @@ namespace API_Setup_User_config.Controllers
         [HttpPost]
         public ActionResult Post([FromBody] JsonElement json)
         {
-            string match = json.GetString("match").ToString();
+            string match = json.GetString("match");
 
-            int id = Convert.ToInt32( json.GetString("id"));
+            string email = json.GetString("email");
 
-            Post post = new Post(id, match); 
-            return Ok(dbSetup("System", "silvereye", "post", post.id, post.match));
+            int id = Convert.ToInt32(json.GetString("id"));
+            if (id == 0)
+            {
+                Post post = new Post(email, match);
+                return Ok(dbSetup("System", "silvereye", "post", post.email, post.match, null));
+            }
+            else
+            {
+                // return all the users first + lastnames by using the ID sent by the application
+                dbSetup("GateKeeper", "silvereye", "friendsList", null, null, id);
+                return Ok($"{DatabaseGetOne.FirstName} {DatabaseGetOne.LastName}");
+            }
+            
         }
 
         // PUT: api/User/5

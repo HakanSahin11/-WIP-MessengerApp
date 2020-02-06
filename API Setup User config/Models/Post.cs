@@ -8,13 +8,13 @@ namespace API_Setup_User_config.Models
 {
     public partial class Post
     {
-        public Post(int id, string match)
+        public Post(string email, string match)
         {
-            this.id = id;
+            this.email = email;
             this.match = match;
         }
 
-        public int id { get; set; }
+        public string email { get; set; }
         public string match { get; set; }
     }
 }
