@@ -75,7 +75,7 @@ namespace Chat_App
         public void ApiSetup()
         {
             //Post request to send
-            string test = $"{{ \"email\" : \"{TxtUsername.Text}\",\"match\" : \"{PassLogin.Password}\", \"id\" : \"0\"}}";
+            string test = $"{{ \"email\" : \"{TxtUsername.Text}\",\"match\" : \"{PassLogin.Password}\", \"id\" : \"0\", \"usage\" : \"login\"}}";
             JObject json = JObject.Parse(test);
 
             HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create("https://localhost:44371/api/User");

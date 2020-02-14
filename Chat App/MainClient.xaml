@@ -4,9 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chat_App"
+        xmlns:ed="http://schemas.microsoft.com/expression/2010/drawing"
         mc:Ignorable="d"
         WindowState="Maximized"
         Title="MainClient" Height="1080" Width="1920">
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -31,7 +33,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="4*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
@@ -44,40 +46,42 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
         <Image Stretch="Fill" Source="C:\Users\hakan\OneDrive\Billeder/Bjerg.jpg" Grid.Column="0" Grid.ColumnSpan="20" Grid.Row="0" Grid.RowSpan="20"/>
 
-        <TextBox x:Name="txtSearch" Foreground="White" Background="Transparent" Grid.Row="2" Text="Search" FontStyle="Italic" Grid.Column="0" Margin="10,0,10,10" PreviewMouseDown="txtSearch_MouseDown"/>
 
         <Button x:Name="BtnLogout" Content="Sign Out" HorizontalContentAlignment="Center" Grid.Row="20"  Margin="10,10,15,10"  Grid.Column="0"/>
         <Border BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="0" Grid.ColumnSpan="1" Margin="10,0,10,10">
-            <StackPanel Background="Transparent"/>
+            <StackPanel Background="Transparent" x:Name="StackPChatHistory">
+                <ComboBox x:Name="comboBoxMode" SelectionChanged="comboBoxMode_SelectionChanged">
+                    <ComboBoxItem Content="Show All" Name="boxItemShowAll"/>
+                    <ComboBoxItem Content="Show Recent" Name="boxItemShowrecent"/>
+                </ComboBox>
+                <Button x:Name="btnAddNewFr" Content="Add a new User" FontSize="14"/>
+                <TextBox x:Name="txtSearch" Foreground="White" Background="Transparent" Text="Search" FontStyle="Italic" Grid.Column="0" PreviewMouseDown="txtSearch_MouseDown" FontSize="14"/>
+                <StackPanel Background="Transparent" x:Name="StackChatItems"/>
+            </StackPanel>
         </Border>
-        <Border BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="1" Grid.ColumnSpan="14" Margin="10,0,10,10">
+        <Border BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="1" Grid.ColumnSpan="12" Margin="10,0,10,10">
             <StackPanel VerticalAlignment="Bottom" Name="StackPanelfield">
                 <StackPanel.Resources>
-                    <Style TargetType="Label">
-                        <Setter Property="Margin" Value="0"></Setter>
+                    <Style TargetType="Border">
+                        <Setter Property="Margin" Value="5"></Setter>
                     </Style>
                 </StackPanel.Resources>
 
             </StackPanel>
 
         </Border>
-            <TextBox Text="Enter your message" x:Name="txtUserMessage"  TextWrapping="Wrap" PreviewKeyDown="txtUserMessageSend_PreviewKeyDown" PreviewMouseDown="txtUserMessage_PreviewMouseDown" FontStyle="Italic" Grid.Row="18" Grid.Column="1" Grid.ColumnSpan="14" Margin="10,0,10,10"/>
+            <TextBox Text="Enter your message" x:Name="txtUserMessage"  TextWrapping="Wrap" PreviewKeyDown="txtUserMessageSend_PreviewKeyDown" PreviewMouseDown="txtUserMessage_PreviewMouseDown" FontStyle="Italic" Grid.Row="18" Grid.Column="1" Grid.ColumnSpan="12" Margin="10,0,10,10"/>
 
         <Border x:Name="stackPanelBorder" BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="17" Margin="10,0,10,10">
             <StackPanel x:Name="stackPanelFriendsList">
-                
-                <Button x:Name="btnAddNewFr" Content="Add a new User" FontSize="14"/>
+                <Label Content="Add userinformation here"/>
                 <Separator/>
-
             </StackPanel>
         </Border>
-        <Button x:Name="BtnShowFriends" Content="Friends List" Grid.Column="17" Grid.Row="18" Margin="10,0,10,10" Click="BtnShowFriends_Click"/>
         <StackPanel Grid.Column="5" Grid.Row="19"/>
     </Grid>
 </Window>
