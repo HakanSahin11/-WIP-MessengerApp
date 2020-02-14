@@ -10,7 +10,7 @@ namespace API_Setup_User_config.Models
     public class UserClass
     {
         public static readonly string Name = "Users";
-        
+
         public UserClass(int id, string email, string password, int[] friendsList, int[] incFriendReq, int[] sentFriendReq, string userType, string firstName, string lastName, char gender, string country, string city, string address, string jobTitle, int age, string loginBan, List<chatListsMethod> Chat)
         {
             _id = id;
@@ -51,26 +51,42 @@ namespace API_Setup_User_config.Models
         public List<chatListsMethod> Chat { get; set; }
     }
 
+
     public class chatListsMethod
     {
-        public chatListsMethod(int id, List<Chats> chatLists)
+        public static readonly string Name = "Log";
+
+        public chatListsMethod(int _id, List<messages> Chat)
         {
-            Id = id;
+            this._id = _id;
+            this.Chat = Chat;
+        }
+
+        public int _id { get; set; }
+        public List<messages> Chat { get; set; }
+    }
+    public class messages
+    {
+        public messages(int id, List<Chats> chatLists)
+        {
+            _id = id;
             this.chatLists = chatLists;
         }
 
-        public int Id { get; set; }
+        public int _id { get; set; }
         public List<Chats> chatLists { get; set; }
     }
     public class Chats
     {
-        public Chats(string message, string Timestamp)
+        public Chats(string message, string Timestamp, bool CurrentUser)
         {
             this.message = message;
             this.Timestamp = Timestamp;
+            this.CurrentUser = CurrentUser;
         }
 
         public string message { get; set; }
         public string Timestamp { get; set; }
+        public bool CurrentUser { get; set; }
     }
 }

@@ -23,6 +23,7 @@ namespace API_Setup_User_config.Controllers
         public List<List<UserClass>> DatabaseGet = new List<List<UserClass>>();
         public UserClass DatabaseGetOne { get;set; }
         public SaltClass DatabasePost { get; set; }
+        public chatListsMethod ChatLists { get; set; }
 
         bool dbSetup(string user, string pass, string usage, string email, string match, int? id)
         {
@@ -168,9 +169,10 @@ namespace API_Setup_User_config.Controllers
             string match = json.GetString("match");
 
             string email = json.GetString("email");
+            string usage = json.GetString("usage");
 
             int id = Convert.ToInt32(json.GetString("id"));
-            if (id == 0)
+            if (usage == "login")
             {
                 Post post = new Post(email, match);
                 return Ok(dbSetup("System", "silvereye", "post", post.email, post.match, null));
