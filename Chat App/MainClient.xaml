@@ -57,22 +57,23 @@
                 <ComboBox x:Name="comboBoxMode" SelectionChanged="comboBoxMode_SelectionChanged">
                     <ComboBoxItem Content="Show All" Name="boxItemShowAll"/>
                     <ComboBoxItem Content="Show Recent" Name="boxItemShowrecent"/>
+                    <ComboBoxItem Content="Friend Request Sent" Name="boxItemFriendReqSent"/>
+                    <ComboBoxItem Content="Friend Request Recieved" Name="boxItemFriendReqRecieved"/>
                 </ComboBox>
-                <Button x:Name="btnAddNewFr" Content="Add a new User" FontSize="14"/>
+                <Button x:Name="btnAddNewFr" Content="Add a new User" FontSize="14" Click="btnAddNewFr_Click"/>
                 <TextBox x:Name="txtSearch" Foreground="White" Background="Transparent" Text="Search" FontStyle="Italic" Grid.Column="0" PreviewMouseDown="txtSearch_MouseDown" FontSize="14"/>
                 <StackPanel Background="Transparent" x:Name="StackChatItems"/>
             </StackPanel>
         </Border>
+
         <Border BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="1" Grid.ColumnSpan="12" Margin="10,0,10,10">
-            <StackPanel VerticalAlignment="Bottom" Name="StackPanelfield">
+            <StackPanel Name="StackPanelfield">
                 <StackPanel.Resources>
                     <Style TargetType="Border">
                         <Setter Property="Margin" Value="5"></Setter>
                     </Style>
                 </StackPanel.Resources>
-
             </StackPanel>
-
         </Border>
             <TextBox Text="Enter your message" x:Name="txtUserMessage"  TextWrapping="Wrap" PreviewKeyDown="txtUserMessageSend_PreviewKeyDown" PreviewMouseDown="txtUserMessage_PreviewMouseDown" FontStyle="Italic" Grid.Row="18" Grid.Column="1" Grid.ColumnSpan="12" Margin="10,0,10,10"/>
 

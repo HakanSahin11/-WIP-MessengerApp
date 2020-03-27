@@ -8,11 +8,11 @@ namespace Chat_App.Methods
     {
         public FriendsListMethod(string names, int id)
         {
-            this.names = names;
-            this.id = id;
+            this.Names = names;
+            this.Id = id;
         }
 
-        string names { get; set; }
-        int id { get; set; }
+       public string Names { get; set; }
+       public int Id { get; set; }
     }
 }

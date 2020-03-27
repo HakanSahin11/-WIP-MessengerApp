@@ -15,4 +15,16 @@ namespace Chat_App.Methods
         public string email { get; set; }
         public string match { get; set; }
     }
+
+    public class PostReturnUsers
+    {
+        public PostReturnUsers(string json, int id)
+        {
+            this.json = json;
+            this.id = id;
+        }
+
+        public string json { get; set; }
+        public int id { get; set; }
+    }
 }
