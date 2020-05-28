@@ -6,13 +6,19 @@
         xmlns:local="clr-namespace:Chat_App"
         mc:Ignorable="d"
         Title="LoginSite" Height="450" Width="800">
-    <Grid>
+    <Window.Resources>
+        <Style x:Key="ControlBaseSpacing" TargetType="{x:Type Control}">
+            <Setter Property="Margin" Value="0,0,0,5"></Setter>
+        </Style>
+    </Window.Resources>
+    <ScrollViewer x:Name="ScrollView" CanContentScroll="True" VerticalScrollBarVisibility="Auto">
+
+        <Grid x:Name="Grid1">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
@@ -21,17 +27,9 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
@@ -45,18 +43,23 @@
         </Grid.RowDefinitions>
 
 
-        <Image Margin="0,-17,0,0" Grid.RowSpan="21" Stretch="Fill" Source="C:\Users\hakan\OneDrive\Billeder/Bjerg.jpg" Grid.ColumnSpan="11"/>
+            <Image Margin="0,-17,0,0" Grid.RowSpan="21" Stretch="Fill" Source="C:\Users\hakan\OneDrive\Billeder/Bjerg.jpg" Grid.ColumnSpan="11"/>
+            <StackPanel x:Name="StackPanelLabels" Visibility="Visible" Grid.Row="3" Grid.RowSpan="7" Grid.Column="3"/>
+            <StackPanel Grid.Row="2" Grid.Column="4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="&#x2190;" Visibility="Visible"  Name="arrow" PreviewMouseDown="Arr_PreviewMouseDown" Grid.Column="0" FontSize="14" VerticalAlignment="Top"/>
+                    <TextBlock x:Name="LBHeading" FontSize="14" Text="Login Site" Foreground="White"   TextWrapping="Wrap" HorizontalAlignment="Left" Grid.Column="1"/>
+                </Grid>
+            </StackPanel>
+
+            <StackPanel x:Name="StackPanelField"  Grid.Column="4" Grid.Row="3" Grid.RowSpan="7"/>
 
 
-        <Label x:Name="LBLogin" Foreground="White"  Content="Username / Email" FontSize="14" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom" Grid.Column="5" Grid.Row="6" Grid.RowSpan="2" />
-        <Label x:Name="LBPassword" Foreground="White"  Content="Password" FontSize="14" Grid.Column="5" Grid.Row="8" Grid.RowSpan="2" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Center"/>
-        <TextBox x:Name="TxtUsername" Text="Enter Username / Email" PreviewMouseDown="txtUsername_MouseDown" Grid.Column="5" Grid.Row="8" VerticalAlignment="Top" HorizontalContentAlignment="Center"/>
-        <PasswordBox x:Name="PassLogin"  PreviewMouseDown="PassLogin_PreviewMouseDown" Grid.Row="10" Grid.Column="5" VerticalAlignment="Top"/>
-        <Button x:Name="btnSignIn" Content="Sign In" Grid.Column="5" Grid.Row="11" VerticalAlignment="Top" Click="btnSignIn_Click"/>
-        <CheckBox Content="Remember Me" Foreground="White"  Grid.Column="5" Grid.Row="12" VerticalAlignment="Top" Margin="2" />
-        <Label x:Name="LBLoginTitle" Foreground="White"  Content="Chat Login Site" FontSize="14" FontWeight="Bold" Grid.Column="5" Grid.Row="5" Grid.RowSpan="2" HorizontalContentAlignment="Center"/>
-        <Label x:Name="LBcreateUser" Foreground="White"  Content="No User? Create one here!" Grid.Column="5" Grid.Row="13" Grid.RowSpan="2" FontSize="10" VerticalContentAlignment="Bottom"/>
-        <Button x:Name="BtnCreateUser" Content="Create User" Grid.Column="5" Grid.Row="15"/>
+        </Grid>
+    </ScrollViewer>
 
-    </Grid>
 </Window>

@@ -67,16 +67,18 @@
         </Border>
 
         <Border BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="1" Grid.ColumnSpan="12" Margin="10,0,10,10">
-            <StackPanel Name="StackPanelfield">
-                <StackPanel.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="Margin" Value="5"></Setter>
-                    </Style>
-                </StackPanel.Resources>
-            </StackPanel>
+            <ScrollViewer x:Name="scrollViewer" HorizontalScrollBarVisibility="Auto" CanContentScroll="True" Visibility="Collapsed">
+                <StackPanel Name="StackPanelfield">
+                    <StackPanel.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="Margin" Value="5"></Setter>
+                        </Style>
+                    </StackPanel.Resources>
+                </StackPanel>
+            </ScrollViewer>
         </Border>
-            <TextBox Text="Enter your message" x:Name="txtUserMessage"  TextWrapping="Wrap" PreviewKeyDown="txtUserMessageSend_PreviewKeyDown" PreviewMouseDown="txtUserMessage_PreviewMouseDown" FontStyle="Italic" Grid.Row="18" Grid.Column="1" Grid.ColumnSpan="12" Margin="10,0,10,10"/>
-
+        <TextBox Text="Enter your message" x:Name="txtUserMessage"  TextWrapping="Wrap" PreviewKeyDown="txtUserMessageSend_PreviewKeyDown" PreviewMouseDown="txtUserMessage_PreviewMouseDown" FontStyle="Italic" Grid.Row="18" Grid.Column="1" Grid.ColumnSpan="11" Margin="10,0,2,10"/>
+        <Button x:Name="sendMessage" Content="Send" Grid.Row="18" Grid.Column="12" Margin="0,0,10,10" Click="sendMessage_Click"/>
         <Border x:Name="stackPanelBorder" BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="17" Margin="10,0,10,10">
             <StackPanel x:Name="stackPanelFriendsList">
                 <Label Content="Add userinformation here"/>

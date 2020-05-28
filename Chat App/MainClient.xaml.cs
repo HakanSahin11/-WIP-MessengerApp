@@ -20,11 +20,17 @@ using MoreLinq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static Chat_App.Methods.Logs;
+using static Chat_App.LoginSite;
 
 namespace Chat_App
 {
     /// <summary>
-    /// Interaction logic for MainClient.xaml
+    /// Notes / issues / todos
+    /// 
+    /// ISSUE: For some reason, when sending a new message to a user, then go to another window, 
+    /// then go back to the messaged user, the timeline of the messages will be fucked, the most recent at the top 
+    /// Issue fixed, was due to using string format instead of Datetime, for comparison / orderby
+    /// 
     /// </summary>
     public partial class MainClient : Window
     {
@@ -33,56 +39,71 @@ namespace Chat_App
             InitializeComponent();
             comboBoxMode.SelectedIndex = 1;
         }
-        public string CurrentName = "jpomfrey5@uol.com.br";
-        public int CurrentID = 6;
+        public string CurrentName()
+        {
+                  // return LoginSite.username;  //Use this for when the login system is activated:
+            return "jpomfrey5@uol.com.br";  // Use this if login system isnt in use
+        }
+        
+        public int CurrentID;
         public UserClass MessagedUser;
         public UserClass CurrentUser()
         {
-            var email = CurrentName;
-            var jsonStr = new WebClient().DownloadString(($"https://localhost:44371/api/user/{email}"));
+            var jsonStr = new WebClient().DownloadString(($"https://localhost:44371/api/user/{CurrentName()}"));
             return JsonConvert.DeserializeObject<UserClass>(jsonStr);
         }
+        public string jsonResponse;
 
         private void comboBoxMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var jsonStr = new WebClient().DownloadString(($"https://localhost:44371/api/User/{CurrentName}"));
+            var jsonStr = new WebClient().DownloadString(($"https://localhost:44371/api/User/{CurrentName()}"));
             //  CurrentUser = Newtonsoft.Json.JsonConvert.DeserializeObject<UserClass>(jsonStr);
             var user = CurrentUser();
+            CurrentID = user._id;
+
             StackChatItems.Children.Clear();
             friendsList.Clear();
             foreach (var item in user.FriendsList)
             {
-                var response = APICall(item, "friendsList", "");
+                 APICall(item, "friendsList", "", string.Empty);
             }
 
 
-            if (comboBoxMode.SelectedIndex == 0)
+            switch (comboBoxMode.SelectedIndex)
             {
-                ShowAllUsers(user);
-            }
-            else if (comboBoxMode.SelectedIndex == 1)
-            {
-                formerChatHistorySetup(user);
-            }
-            else if (comboBoxMode.SelectedIndex == 2)
-            {
-                APICall(CurrentID, "PostSentReq", null);
-            }
-            else if (comboBoxMode.SelectedIndex == 3)
-            {
-                APICall(CurrentID, "RecievedReq", null);
+                case 0:
+                    ShowAllUsers(user);
+                    break;
+                case 1:
+                    formerChatHistorySetup(user);
+                    break;
+                case 2:
+                    APICall(CurrentID, "PostSentReq", null, string.Empty);
+                    break;
+                case 3:
+                    APICall(CurrentID, "RecievedReq", null, string.Empty);
+                    break;
+
             }
         }
         List<PostReturnUsers> SearchResults = new List<PostReturnUsers>();
 
         #region API CALL
-        public PostReturnUsers APICall(int id, string usage, string value)
+        public void APICall(int id, string usage, string value, string jsonStr)
         {
             //Post request to send
-            string jsonStr = $"{{ \"id\" : \"{id}\", \"usage\" : \"{usage}\", \"value\" : \"{value}\" }}";
-            JObject json = JObject.Parse(jsonStr);
+            HttpWebRequest httpWebRequest;
 
-            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create("https://localhost:44371/api/User");
+            if (jsonStr == string.Empty)
+            {
+                jsonStr = $"{{ \"id\" : \"{id}\", \"usage\" : \"{usage}\", \"value\" : \"{value}\" }}";
+                httpWebRequest = (HttpWebRequest)WebRequest.Create("https://localhost:44371/api/User");
+            }
+            else
+            {
+                httpWebRequest = (HttpWebRequest)WebRequest.Create("https://localhost:44371/api/PersonalChat");
+            }
+            JObject json = JObject.Parse(jsonStr);
             httpWebRequest.ContentType = "text/json";
             httpWebRequest.Method = "POST";
             //Sending the request
@@ -98,6 +119,17 @@ namespace Chat_App
             string responseString = reader.ReadToEnd();
             reader.Close();
 
+            if (usage == "PersonalChat")
+            {
+
+            }
+            else if (usage != string.Empty)
+            {
+                test(id, usage, value, responseString);
+            }
+        }
+
+        public PostReturnUsers test(int id, string usage, string value, string responseString) { 
             if (usage == "friendsList")
             {
                 friendsList.Add(new FriendsListMethod(responseString, id));
@@ -134,7 +166,8 @@ namespace Chat_App
                              user.SentFriendReq.ToList().Exists(n => n == c.id));
 
 
-                stackPanel.Children.Add(labelSetup("Search Results:", 16, FontStyles.Normal, Brushes.Transparent, Brushes.White));
+                stackPanel.Children.Add(Labels("Search Results:", 16, FontStyles.Normal, Brushes.Transparent, Brushes.White));
+
                 stackPanel.Children.Add(new Separator());
                 foreach (var item in ListOfUsers)
                 {
@@ -142,7 +175,8 @@ namespace Chat_App
                     Border border = new Border();
                     border.BorderBrush = Brushes.Black;
                     border.BorderThickness = new Thickness(1);
-                    Label lbNames = labelSetup(item.json, 16, FontStyles.Normal, Brushes.Transparent, Brushes.Black);
+                    border.Name = $"borderAddUser{item.id}";
+                    Label lbNames = Labels(item.json, 16, FontStyles.Normal, Brushes.Transparent, Brushes.Black);
                     lbNames.HorizontalAlignment = HorizontalAlignment.Left;
 
                     Button btn = buttonSetup("Add Friend", 14, Brushes.LightGray, Brushes.Black, HorizontalAlignment.Right);
@@ -165,7 +199,7 @@ namespace Chat_App
                 foreach (var item in result)
                 {
                     StackPanel stackPanel = new StackPanel();
-                    stackPanel.Children.Add(labelSetup(item.json, 14, FontStyles.Normal, Brushes.Transparent, Brushes.White));
+                    stackPanel.Children.Add(Labels(item.json, 14, FontStyles.Normal, Brushes.Transparent, Brushes.White));
                     Button btnCancel = buttonSetup("Cancel", 14, Brushes.LightGray, Brushes.Black, HorizontalAlignment.Center);
                     btnCancel.Name = $"friendReqcancel{item.id}";
                     btnCancel.Click += BtnCancel_Click;
@@ -184,6 +218,16 @@ namespace Chat_App
                 RecievedReqSection(JsonConvert.DeserializeObject<List<PostReturnUsers>>(responseString));
                 //   return( new PostReturnUsers(result.FirstName, result))
             }
+
+            else if( usage == "PostAddFriend")
+            {
+                if (responseString == "true")
+                {
+                    StackChatItems.Children.Clear();
+                    MessageBox.Show("Successfully added!");
+                }
+                else { MessageBox.Show("Error! Unexpected error has eccoured: Error code 10"); }
+            }
             return (new PostReturnUsers(responseString, id));
         }
 
@@ -191,9 +235,9 @@ namespace Chat_App
         {
             Button btn = e.Source as Button;
             string id = Regex.Replace(btn.Name, "[^0-9.]", "");
-            var APIResponse = APICall(CurrentID, "CancelSentReq", id);
+            APICall(CurrentID, "CancelSentReq", id, string.Empty);
             StackChatItems.Children.Clear();
-            APICall(CurrentID, "PostSentReq", null);
+            APICall(CurrentID, "PostSentReq", null, string.Empty);
         }
 
         public void RecievedReqSection(List<PostReturnUsers> list)
@@ -201,7 +245,7 @@ namespace Chat_App
             foreach (var item in list)
             {
                 StackPanel stackPanel = new StackPanel();
-                stackPanel.Children.Add(labelSetup(item.json, 14, FontStyles.Normal, Brushes.Transparent, Brushes.White));
+                stackPanel.Children.Add(Labels(item.json, 14, FontStyles.Normal, Brushes.Transparent, Brushes.White));
                 Grid grid = new Grid();
                 ColumnDefinition c1 = new ColumnDefinition();
                 c1.Width = new GridLength(5, GridUnitType.Star);
@@ -237,9 +281,9 @@ namespace Chat_App
         {
             Button button = e.Source as Button;
             string id = Regex.Replace(button.Name, "[^0-9.]", "");
-            APICall(CurrentID, "FriendReqAccep", id);
+            APICall(CurrentID, "FriendReqAccep", id, string.Empty);
             StackChatItems.Children.Clear();
-            APICall(CurrentID, "RecievedReq", null);
+            APICall(CurrentID, "RecievedReq", null, string.Empty);
         }
 
         private void addFriendsSelected_Click(object sender, RoutedEventArgs e)
@@ -247,15 +291,13 @@ namespace Chat_App
             Button button = e.Source as Button;
             string id = Regex.Replace(button.Name, "[^0-9.]", "");
 
-            var APIResponse = APICall(CurrentID, "PostAddFriend", id);
+            APICall(CurrentID, "PostAddFriend", id, string.Empty);
+            btnAddNewFr_Click(btnAddNewFr, null);
+            //here
+            FriendsSearchsetup();
 
-            //Runs the code again, to clear the selected user
-            if (APIResponse.json == "true")
-            {
-                StackChatItems.Children.Clear();
-                MessageBox.Show("Successfully added!");
-            }
-            else { MessageBox.Show("Error! Unexpected error has eccoured: Error code 10"); }
+
+
         }
         public chatListsMethod Logs()
         {
@@ -333,40 +375,54 @@ namespace Chat_App
         
         #region Chat Old Interface
         private void txtUserMessageSend_PreviewKeyDown(object sender, KeyEventArgs e)
-        {/*
+        {   
             if (e.Key == Key.Enter)
             {
-                var userName = "User";
-
-                DateTime timeSent = DateTime.Now;
-                string text = txtUserMessage.Text;
-
-                // show messages
-                var timeStamp = new Label();
-                timeStamp.Content = $"{userName} at {timeSent}";
-                timeStamp.Foreground = Brushes.White;
-                timeStamp.FontSize = 10;
-                timeStamp.VerticalAlignment = VerticalAlignment.Bottom;
-                timeStamp.VerticalContentAlignment = VerticalAlignment.Bottom;
-                timeStamp.FontStyle = FontStyles.Italic;
-
-                var input = new Label();
-                input.Content = $"{text}\n";
-                input.Foreground = Brushes.White;
-                input.FontSize = 14;
-                input.VerticalAlignment = VerticalAlignment.Top;
-                input.VerticalContentAlignment = VerticalAlignment.Top;
-
-                StackPanelfield.Children.Add(timeStamp);
-                StackPanelfield.Children.Add(input);
-                // bson to db with "text"
-
-                txtUserMessage.Clear();
+                MessageSendToAPI();
             }
-            */
         }
+
+        private void sendMessage_Click(object sender, RoutedEventArgs e)
+        {
+            MessageSendToAPI();
+        }
+
+        public void MessageSendToAPI()
+        {
+            var label = Labels(txtUserMessage.Text, 14, FontStyles.Normal, Brushes.SkyBlue, Brushes.Black);
+            var timestamp = Labels(DateTime.Now.ToString(), 9, FontStyles.Italic, Brushes.SkyBlue, Brushes.Black);
+
+            Border border = new Border();
+            border.HorizontalAlignment = HorizontalAlignment.Right;
+            border.BorderBrush = Brushes.Black;
+            border.BorderThickness = new Thickness(1);
+
+            Grid grid = msgGridSetup(timestamp, label);
+
+            border.Child = grid;
+            StackPanelfield.Children.Add(border);
+            txtUserMessage.Clear();
+
+            test(timestamp.Content.ToString(), label.Content.ToString());
+            //add message to personalapicontroller here
+            
+        }
+        void test(string dateTime, string Message)
+        {
+            //Add post call to PersonalChatController with the following input, in the postman example format
+
+            //current users format
+            string json = $" {{ \"CurrentID\":{CurrentID}, \"MatchID\":{CurrentMessagingUserID}, \"message\":\"{Message}\", \"Timestamp\":\"{dateTime}\", \"CurrentUser\":true }}";
+            APICall(CurrentID, string.Empty, string.Empty, json);
+
+            //recieving users format (for log)
+            json = $" {{ \"CurrentID\":{CurrentMessagingUserID}, \"MatchID\":{CurrentID}, \"message\":\"{Message}\", \"Timestamp\":\"{dateTime}\", \"CurrentUser\":false }}";
+            APICall(CurrentMessagingUserID, string.Empty, string.Empty, json);
+
+
+        }
+
         #endregion
-        
 
         private void txtUserMessage_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -378,45 +434,53 @@ namespace Chat_App
         }
 
         #region New Chat Interface
+        int CurrentMessagingUserID;
+
         private void btn_FriendsList_click(object sender, RoutedEventArgs e)
         {
+            scrollViewer.Visibility = Visibility.Visible;
             // removes the letters of the current button in use, leaving only the numbers left, which is their unique ID number
             Button button = e.Source as Button;
-            string id = Regex.Replace(button.Name, "[^0-9.]","");
 
+
+        //    string id = Regex.Replace(button.Name, "[^0-9.]","");
+            CurrentMessagingUserID = Convert.ToInt32(Regex.Replace(button.Name, "[^0-9.]", ""));
+
+
+            
             // used to send the request to recieve the chat logs
             StackPanelfield.Children.Clear();
             StackPanelfield.VerticalAlignment = VerticalAlignment.Bottom;
-       //     var name = FriendsList.Where(x => x.Value == Convert.ToInt32(id)).ToDictionary();
-            var name = friendsList.Where(x => x.Id == Convert.ToInt32(id)).ToList();
+            //     var name = FriendsList.Where(x => x.Value == Convert.ToInt32(id)).ToDictionary();
+            var name = friendsList.Where(x => x.Id == CurrentMessagingUserID).ToList();
             string FullName = "";
             foreach (var item in name)
             {
                 FullName = item.Names;
             }
             Separator separator = new Separator();
-            StackPanelfield.Children.Add(labelSetup($"This is the start of your conversation with {FullName}", 14, FontStyles.Italic, Brushes.Transparent, Brushes.White));
+            StackPanelfield.Children.Add(Labels($"This is the start of your conversation with {FullName}", 14, FontStyles.Italic, Brushes.Transparent, Brushes.White));
             StackPanelfield.Children.Add(separator);
             StackPanelfield.Margin = new Thickness(0, 0, 0, 0);
 
             var logs = Logs();
             var message =
                 from c in logs.Chat
-                where c._id == Convert.ToInt32(id)
+                where c._id == Convert.ToInt32(CurrentMessagingUserID)
                 select c.chatLists;
-            var test = logs.Chat.Where(x => x._id == Convert.ToInt32(id)).ToList();
+            var test = logs.Chat.Where(x => x._id == Convert.ToInt32(CurrentMessagingUserID)).ToList();
             
-           var test2 = test.Cast<messages>().ToArray();            
-
+           var test2 = test.Cast<messages>().ToArray();
             //Find a more smooth way than by using 2 foreach loops
             foreach (var item in test2)
             {
-                List<Chats> sortedList = item.chatLists.OrderBy(O => O.Timestamp).ToList();
+                List<Chats> sortedList = item.chatLists.OrderBy(O => Convert.ToDateTime(O.Timestamp)).ToList();
+                
                 foreach (var item2 in sortedList)
                 {
                     // Sets the format for the displaying messages sent and recieved
-                    var label = labelSetup(item2.message, 14, FontStyles.Normal, Brushes.SkyBlue, Brushes.Black);
-                    var timestamp = labelSetup(item2.Timestamp, 9, FontStyles.Italic, Brushes.SkyBlue, Brushes.Black);
+                    var label = Labels(item2.message, 14, FontStyles.Normal, Brushes.SkyBlue, Brushes.Black);
+                    var timestamp = Labels(item2.Timestamp, 9, FontStyles.Italic, Brushes.SkyBlue, Brushes.Black);
 
                     Border border = new Border();
                     border.HorizontalAlignment = HorizontalAlignment.Right;
@@ -429,28 +493,35 @@ namespace Chat_App
                         label.Background = Brushes.White;
                         border.HorizontalAlignment = HorizontalAlignment.Left;
                     }
-
-                    Grid grid = new Grid();
-                    RowDefinition rd = new RowDefinition();
-                    rd.Height = GridLength.Auto;
-                    RowDefinition rd2 = new RowDefinition();
-                    rd2.Height = GridLength.Auto;
-                    grid.RowDefinitions.Add(rd);
-                    grid.RowDefinitions.Add(rd2);
-
-                    grid.Children.Add(timestamp);
-                    grid.Children.Add(label);
-                    Grid.SetRow(timestamp, 0);
-                    Grid.SetRow(label, 1);
+                    Grid grid = msgGridSetup(timestamp, label);
                     border.Child = grid;
                     StackPanelfield.Children.Add(border);
+
                 }
             }
-        }
+           
 
+        }
         #endregion
 
-        public Label labelSetup(string message, int size, FontStyle font, Brush background, Brush foreground)
+        public Grid msgGridSetup(Label timestamp, Label msg)
+        {
+            Grid grid = new Grid();
+            RowDefinition rd = new RowDefinition();
+            rd.Height = GridLength.Auto;
+            RowDefinition rd2 = new RowDefinition();
+            rd2.Height = GridLength.Auto;
+            grid.RowDefinitions.Add(rd);
+            grid.RowDefinitions.Add(rd2);
+
+            grid.Children.Add(timestamp);
+            grid.Children.Add(msg);
+            Grid.SetRow(timestamp, 0);
+            Grid.SetRow(msg, 1);
+
+            return grid;
+        }
+        public Label Labels(string message, int size, FontStyle font, Brush background, Brush foreground)
         {
             Label label = new Label();
             label.FontSize = size;
@@ -467,7 +538,7 @@ namespace Chat_App
             StackPanelfield.VerticalAlignment = VerticalAlignment.Top;
            
             txtUserMessage.Visibility = Visibility.Hidden;
-            var lb = labelSetup("Search for friends to Add", 20, FontStyles.Italic, Brushes.Transparent, Brushes.White);
+            var lb = Labels("Search for friends to Add", 20, FontStyles.Italic, Brushes.Transparent, Brushes.White);
             lb.HorizontalAlignment = HorizontalAlignment.Center;
             TextBox textBox = new TextBox();
             textBox.Text = "Search for user";
@@ -487,7 +558,6 @@ namespace Chat_App
             StackPanelfield.Children.Add(lb);
             StackPanelfield.Children.Add(textBox);
             StackPanelfield.Children.Add(btn);
-
         }
 
         private void Addfriends_Click(object sender, RoutedEventArgs e)
@@ -505,12 +575,12 @@ namespace Chat_App
 
         public void FriendsSearchsetup()
         {
-            var apiResponse = APICall(0, "AddFriends", "");
-            List<FriendsListMethod> ListofUsers = new List<FriendsListMethod>();
+            APICall(0, "AddFriends", "", string.Empty);
+            //   List<FriendsListMethod> ListofUsers = new List<FriendsListMethod>();
             //       chatListsMethod logs = JsonConvert.DeserializeObject<chatListsMethod>(jsonStr);
-      //      JObject json = JObject.Parse(apiResponse);
-       //     ListofUsers.Add(JsonConvert.DeserializeObject<FriendsListMethod>(apiResponse.json));
-
+            //      JObject json = JObject.Parse(apiResponse);
+            //     ListofUsers.Add(JsonConvert.DeserializeObject<FriendsListMethod>(apiResponse.json));
+            
         }
 
         public Button buttonSetup(string content, int size, Brush background, Brush foreground, HorizontalAlignment contentALignment)
@@ -524,5 +594,7 @@ namespace Chat_App
             button.HorizontalContentAlignment = contentALignment;
             return button;
         }
+
+       
     }
 }
