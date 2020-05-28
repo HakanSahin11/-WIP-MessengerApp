@@ -11,13 +11,13 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 
-//Error line 68
 namespace API_Setup_User_config.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class PersonalChatController : Controller
     {
+        // controller is used for saving messages sent to other users, both new and old users
         public IMongoCollection<BsonDocument> BsonLog;
 
         [HttpPost]
@@ -27,8 +27,6 @@ namespace API_Setup_User_config.Controllers
             var matchId   = Convert.ToInt32(json.GetString("MatchID"));
             Chats chat = new Chats(json.GetString("message"), json.GetString("Timestamp"), Convert.ToBoolean(json.GetString("CurrentUser")));
             
-
-
             ChatController chatController = new ChatController();
             var chatListsMethod = chatController.ApiSetup("GateKeeper", "silvereye", currentId);
             var newMessage = true;
@@ -44,28 +42,24 @@ namespace API_Setup_User_config.Controllers
             }
             if (newMessage == true)
             {
-             //   List<messages> messages = new List<messages> { new messages(matchId, new List<Chats> { chat }) };
+             //  Adds a new id to the list, for usage of first time message sent / recieved
                 messages message = new messages(matchId, new List<Chats> { chat });
                 chatListsMethod.Chat.Add(message);
-                
             }
-         //   messages TestnewMessage = new messages(matchId, List<Chats>(chat));
-
+            //  Gets current data / chats of the person
             UserController userController = new UserController();
-            userController.dbSetup("System", "silvereye", "PersonalchatController", "", "", currentId);
+            userController.dbSetup("GateKeeper", "silvereye", "PersonalchatController", "", "", currentId);
             BsonLog = userController.BsonCollectionLog;
             BsonSectionLog(currentId, "Chat", chatListsMethod.Chat);
-
             return Ok($"{currentId}\n{matchId}\n{chat.message}");
         }
 
         public void BsonSectionLog(int id, string section, List<messages> list)
         {
+            //Sends data to the db Log, by using "GateKeeper" profile
             FilterDefinition<BsonDocument> filter = Builders<BsonDocument>.Filter.Eq("_id", id);
             UpdateDefinition<BsonDocument> update = Builders<BsonDocument>.Update.Set(section, list);
-
             BsonLog.UpdateOne(filter, update);
-            //Error with "authorization" with logs
         }
     }
 }
