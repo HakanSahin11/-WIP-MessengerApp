@@ -42,24 +42,5 @@ namespace API_Setup_User_config.Controllers
         {
             return Ok (ApiSetup("GateKeeper", "silvereye", id));
         }
-
-
-        // POST: api/Chat
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT: api/Chat/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }

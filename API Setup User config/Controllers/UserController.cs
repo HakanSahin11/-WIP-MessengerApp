@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authentication;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
+using static API_Setup_User_config.Models.BsonSectioncs;
 
 namespace API_Setup_User_config.Controllers
 {
@@ -24,11 +25,19 @@ namespace API_Setup_User_config.Controllers
         public UserClass DatabaseGetOne { get;set; }
         public SaltClass DatabasePost { get; set; }
         public chatListsMethod ChatLists { get; set; }
-        public IMongoCollection<BsonDocument> BsonCollection { get;set; }
+      //  public static IMongoCollection<BsonDocument> BsonCollection { get;set; }
         public IMongoCollection<BsonDocument> BsonCollectionLog { get; set; }
         public bool Status { get; set; }
 
-       public bool dbSetup(string user, string pass, string usage, string email, string match, int? id)
+        public static IMongoCollection<BsonDocument> BsonCollection(string user, string pass, string section)
+        {
+
+            IMongoDatabase client = new MongoClient($"mongodb://{user}:{pass}@localhost:27017").GetDatabase("Virksomhed");
+
+            return client.GetCollection<BsonDocument>( section);
+        }
+
+        public bool dbSetup(string user, string pass, string usage, string email, string match, int? id)
         {
             // sets the Mongodb registry to turn on "IgnoreExtraElements", so the usage of multiple combined classes can be used to sterilize the data from MongoDB, used for the class "UserClass"
             var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
@@ -51,9 +60,9 @@ namespace API_Setup_User_config.Controllers
                     break;
 
                 case "getOne":
-                    //should be unused atm, other than when requesting specific
                     IMongoQueryable<UserClass> usageQuery;
-                    BsonCollection = client.GetCollection<BsonDocument>("Users");
+                    // BsonCollection = client.GetCollection<BsonDocument>("Users");
+                    BsonCollection(user, pass, "Users");
                     if (email != null)
                     {
                            usageQuery =
@@ -80,11 +89,12 @@ namespace API_Setup_User_config.Controllers
                     dbSetup("GateKeeper", "silvereye", "get", null, null, null);
 
                     bool emailSearch = false;
+        
                     foreach (var items in DatabaseGet)
                     {
                         foreach (var item in items)
                         {
-                            if (item.Email.Contains(email))
+                            if (item.Email != null && item.Email.Contains(email))
                             {
                                 DatabaseGetOne = item;
                                 emailSearch = true;
@@ -92,15 +102,6 @@ namespace API_Setup_User_config.Controllers
                             }
                         }
                     }
-
-                    //   var test2 = DatabaseGet.Any(x => x.Any(y => y.Email == email)); Test version work in progress, gives bool so far instead if list
-                    /*
-                    var data = from e in DatabaseGet.AsParallel().WithDegreeOfParallelism(1)     gives whole object?
-                               where e.Any(b => b.Email.Contains(email)) 
-                               select e;
-                                
-                    */
-
 
                     if (emailSearch == false ||  LoginBan > DateTime.Now)
                     {
@@ -114,7 +115,8 @@ namespace API_Setup_User_config.Controllers
                     {
                         DatabasePost = output;
                     }
-                    if (Sha256.Sha256Hash(match, DatabasePost.Salt) != DatabaseGetOne.Password)
+                    //if (Sha256.Sha256Hash(match, DatabasePost.Salt) != DatabaseGetOne.Password)
+                    if (Sha256.NewSha256Hash(match, Convert.FromBase64String(DatabasePost.Salt)).hashSalt != DatabaseGetOne.Password)
                     {
                        /*
                             banTime += banTime;
@@ -141,17 +143,20 @@ namespace API_Setup_User_config.Controllers
                     try
                     {
                         dbSetup(user, pass, "getOne", email, match, id);
-                        //    BsonCollection = client.GetCollection<BsonDocument>("Users");
                         List<int> friendsList = new List<int>();
                         friendsList.AddRange(DatabaseGetOne.SentFriendReq);
                         friendsList.Add(Convert.ToInt32(match));
-                        bsonSection(id, "SentFriendReq", "", friendsList);
+                        bsonObjects bson = bsonSection(id, "SentFriendReq", "", 0, friendsList);
+                  //      BsonCollection.UpdateOne(bson.Filter, bson.Update);
+                        BsonCollection(user, pass, "Users").UpdateOne(bson.Filter, bson.Update);
+
 
                         dbSetup(user, pass, "getOne", email, null, Convert.ToInt32(match));
                         friendsList.Clear();
                         friendsList.AddRange(DatabaseGetOne.IncFriendReq);
                         friendsList.Add(Convert.ToInt32(id));
-                        bsonSection(Convert.ToInt32(match), "IncFriendReq", "", friendsList);
+                        bson = bsonSection(Convert.ToInt32(match), "IncFriendReq", "", 0, friendsList);
+                        BsonCollection(user, pass, "Users").UpdateOne(bson.Filter, bson.Update);
                         Status = true;
                     }
                     catch
@@ -167,30 +172,33 @@ namespace API_Setup_User_config.Controllers
                     //being used to declare BsonCollectionLog for the PersonalchatControllers use, to when it has to make edits to the database
                     BsonCollectionLog = client.GetCollection<BsonDocument>("Log");
                     break;
+
+                case "Delete":
+                    FilterDefinition<BsonDocument> deletefilter;
+                    IMongoCollection<BsonDocument> BsonDoc; 
+                    if (match == "User")
+                    {
+                        BsonDoc = client.GetCollection<BsonDocument>("Users");
+                        deletefilter = Builders<BsonDocument>.Filter.Eq("_id", id);
+                    }
+                    else if( match == "System")
+                    {
+                        BsonDoc = client.GetCollection<BsonDocument>("System");
+                        deletefilter = Builders<BsonDocument>.Filter.Eq("_id", id);
+                    }
+                    else
+                    {
+                        BsonDoc = client.GetCollection<BsonDocument>("Log");
+                        deletefilter = Builders<BsonDocument>.Filter.Eq("_id", id);
+                    }
+
+                    BsonDoc.DeleteOne(deletefilter);
+                    break;
             }
-
-
-
             return result;
         }
 
-        public void bsonSection(int? id, string section, string input, List<int> list)
-        {
-            //sends the ban timer to the mongodb "LoginBan" - Needs to be set up
-            FilterDefinition<BsonDocument> filter;
-            UpdateDefinition<BsonDocument> update;
-            if (input != "")
-            {
-                filter = Builders<BsonDocument>.Filter.Eq("_id", id);
-                update = Builders<BsonDocument>.Update.Set(section, input);
-            }
-            else
-            {
-                filter = Builders<BsonDocument>.Filter.Eq("_id", id);
-                update = Builders<BsonDocument>.Update.Set(section, list);
-            }
-                BsonCollection.UpdateOne(filter, update);
-        }
+        
 
 
         // GET: api/User
@@ -220,28 +228,38 @@ namespace API_Setup_User_config.Controllers
         [HttpPost]
         public ActionResult Post([FromBody] JsonElement json)
         {
+            //todo make a switch instead of if else
             string usage = json.GetString("usage");
             int id = Convert.ToInt32(json.GetString("id"));
             string value = json.GetString("value");
 
 
-            if (usage == "login" || usage == "friendsList")
+            if (usage == "Login" || usage == "friendsList")
             {
                 string match = json.GetString("match");
 
                 string email = json.GetString("email");
 
 
-                if (usage == "login")
+                if (usage == "Login")
                 {
                     Post post = new Post(email, match);
-                    return Ok(dbSetup("System", "silvereye", "post", post.email, post.match, null));
+                    LoginResult result = new LoginResult(dbSetup("System", "silvereye", "post", post.email, post.match, null), DatabaseGetOne.UserType);
+                    return Ok(result);
                 }
                 else
                 {
                     // return all the users first + lastnames by using the ID sent by the application
                     dbSetup("GateKeeper", "silvereye", "friendsList", null, null, id);
-                    return Ok($"{DatabaseGetOne.FirstName} {DatabaseGetOne.LastName}");
+                    try
+                    {
+                        return Ok($"{DatabaseGetOne.FirstName} {DatabaseGetOne.LastName}");
+                    }
+                    catch
+                    {
+                        //case if 0 friends
+                        return Ok("Potus");
+                    }
                 }
             }
             else if (usage == "AddFriends")
@@ -286,15 +304,20 @@ namespace API_Setup_User_config.Controllers
                 dbSetup("GateKeeper", "silvereye", "getOne", null, null, id);
                 List<int> IncReq = new List<int> (DatabaseGetOne.IncFriendReq);
                 IncReq.Remove(Convert.ToInt32(value));
-                bsonSection(id, "IncFriendReq", "", IncReq);
+                var bson = bsonSection(id, "IncFriendReq", "", 0, IncReq);
+                BsonCollection("GateKeeper","silvereye", "Users").UpdateOne(bson.Filter, bson.Update);
+
                 List<int> friendsList = new List<int>(DatabaseGetOne.FriendsList);
                 friendsList.Add(Convert.ToInt32(value));
-                bsonSection(id, "FriendsList", "", friendsList);
+                bson = bsonSection(id, "FriendsList", "", 0, friendsList);
+                BsonCollection("GateKeeper","silvereye", "Users").UpdateOne(bson.Filter, bson.Update);
 
                 dbSetup("GateKeeper", "silvereye", "getOne", null, null, Convert.ToInt32(value));
                 List<int> SentReq = new List<int>(DatabaseGetOne.SentFriendReq);
                 SentReq.Remove(id);
-                bsonSection(DatabaseGetOne._id, "SentFriendReq", "", SentReq);
+                bson = bsonSection(DatabaseGetOne._id, "SentFriendReq", "", 0, SentReq);
+                BsonCollection("GateKeeper", "silvereye", "Users").UpdateOne(bson.Filter, bson.Update);
+
                 friendsList.Clear();
                 friendsList.AddRange(DatabaseGetOne.FriendsList);
                 friendsList.Add(id);
@@ -306,15 +329,25 @@ namespace API_Setup_User_config.Controllers
                 dbSetup("GateKeeper", "silvereye", "getOne", null, null, id);
                 List<int> list = new List<int>(DatabaseGetOne.SentFriendReq);
                 list.Remove(Convert.ToInt32(value));
-                bsonSection(id, "SentFriendReq", "", list);
+                var bson = bsonSection(id, "SentFriendReq", "", 0, list);
+                BsonCollection("GateKeeper","silvereye", "Users").UpdateOne(bson.Filter, bson.Update);
 
                 dbSetup("GateKeeper", "silvereye", "getOne", null, null, Convert.ToInt32(value));
                 list = new List<int>(DatabaseGetOne.IncFriendReq);
                 list.Remove(id);
-                bsonSection(Convert.ToInt32(value), "IncFriendReq", "", list);
+                bson = bsonSection(Convert.ToInt32(value), "IncFriendReq", "", 0, list);
+                BsonCollection("GateKeeper","silvereye", "Users").UpdateOne(bson.Filter, bson.Update);
+
                 return Ok();
             }
-
+            else if(usage == "Delete")
+            {
+                //delete sections
+                dbSetup("adminUser", "silvereye", "Delete", null, "User", id);
+                dbSetup("adminUser", "silvereye", "Delete", null, "System", id);
+                dbSetup("adminUser", "silvereye", "Delete", null, "Log", id);
+                return Ok("Success");
+            }
             else
             {
                 return Ok();

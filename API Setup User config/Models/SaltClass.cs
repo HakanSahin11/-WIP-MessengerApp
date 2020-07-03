@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace API_Setup_User_config.Models
 {
+    //class is being used for the salt values of the database (in a different collection from the rest)
     public class SaltClass
     {
         public static readonly string Name = "System";
