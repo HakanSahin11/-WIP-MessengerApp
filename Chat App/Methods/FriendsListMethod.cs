@@ -6,6 +6,7 @@ namespace Chat_App.Methods
 {
     public class FriendsListMethod
     {
+        //Method for mainclient's (User client) visible friendslist on StackPanelChatHistory
         public FriendsListMethod(string names, int id)
         {
             this.Names = names;

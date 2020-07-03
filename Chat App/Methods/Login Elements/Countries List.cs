@@ -5,6 +5,7 @@ using static Chat_App.LoginSite;
 
 namespace Chat_App.Methods.Login_Elements
 {
+	//Gets a list of all (rather most) countries, then adds it to a string array which will be used for country selection
     public class Countries_List
     {
         public static string[] Countries = new string[]

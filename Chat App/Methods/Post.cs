@@ -6,6 +6,7 @@ namespace Chat_App.Methods
 {
    public class Post
     {
+        //Method used for matching login informations
         public Post(string email, string match)
         {
             this.email = email;

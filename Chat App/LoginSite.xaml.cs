@@ -1,4 +1,5 @@
 ﻿using Chat_App.Methods;
+using Chat_App.Methods.Login_Elements;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -17,19 +18,16 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Xml.Serialization;
 using static Chat_App.Methods.labels;
 using static Chat_App.Methods.Login_Elements.Countries_List;
+using static Chat_App.Methods.Api_elements.APICallReq;
 using Path = System.Windows.Shapes.Path;
+using WPFCustomMessageBox;
 
 namespace Chat_App
 {
-    /// <summary>
-    /// Interaction logic for LoginSite.xaml
-    /// </summary>
-    /// 
-    /// connct to bson API with the request / timer ban coming from this application
-    /// Next step is Sign Up, combine it with the stackpanel
-
+    // Future TODO: make a login ban system / limit to the DB (currently only bans client)
     public partial class LoginSite : Window
     {
         public static string username;
@@ -47,14 +45,7 @@ namespace Chat_App
             ClearRegisteredNames();
             StackPanelLabels.Visibility = Visibility.Hidden;
             StackPanelLabels.Children.Clear();
-
-            //LB Heading
-            /* Label lb = Labels("Chat Login Site", 14, FontStyles.Normal, Brushes.Transparent, Brushes.White, HorizontalAlignment.Center);
-             lb.Style = this.FindResource("ControlBaseSpacing") as Style;
-             StackPanelField.Children.Add( lb);
-             */
             LBHeading.Text = "Login Site";
-
 
             //LB Username 
             var lb2 = Labels("Username / Email", 13, FontStyles.Normal, Brushes.Transparent, Brushes.White, HorizontalAlignment.Center);
@@ -63,6 +54,7 @@ namespace Chat_App
             //Textbot Username 
             TextBox txt = TextBoxes("Enter Username / Email", 13, FontStyles.Normal, Brushes.Black);
             txt.PreviewMouseDown += ClearBox_MouseDown;
+            txt.PreviewKeyDown += CheckSubmit_click;
             //Registers the name so it can be called by StackPanelField.FindName("txtUserName")
             RegisterName("txtUserName", txt);
             RegisteredNames.Add("txtUserName");
@@ -79,6 +71,7 @@ namespace Chat_App
             pwBox.Style = this.FindResource("ControlBaseSpacing") as Style;
             pwBox.VerticalAlignment = VerticalAlignment.Top;
             pwBox.PreviewMouseDown += ClearBox_MouseDown;
+            pwBox.PreviewKeyDown += CheckSubmit_click;
             RegisterName("PasswordBox", pwBox);
             RegisteredNames.Add("PasswordBox");
 
@@ -97,6 +90,15 @@ namespace Chat_App
             var btn2 = Buttons("Create User", 13, Brushes.Black, Brushes.LightGray, SignUp_Click);
             StackPanelField.Children.Add(btn2);
         }
+
+        private void CheckSubmit_click(object sender, KeyEventArgs e)
+        {
+            //Only counting enter as conirmation key
+            if (e.Key == Key.Enter)
+            {
+                btnSignIn_Click(null, null);
+            }
+        }
         private void SignUp_Click(object sender, RoutedEventArgs e)
         {
             SignUpSetup();
@@ -104,23 +106,11 @@ namespace Chat_App
 
         public void SignUpSetup()
         {
+            //fills stackpanel items for creating a new user
             StackPanelField.Children.Clear();
             ClearRegisteredNames();
             StackPanelLabels.Visibility = Visibility.Visible;
-
-            //LB Heading
-            /* Label lb = Labels("Chat Login Site", 14, FontStyles.Normal, Brushes.Transparent, Brushes.White, HorizontalAlignment.Center);
-             lb.Style = this.FindResource("ControlBaseSpacing") as Style;
-             StackPanelField.Children.Add(lb); */
             LBHeading.Text = "Create User";
-            
-            /*Grid1.Children.Remove(arrow);
-
-            Label Arr = arrow;
-            Arr.Visibility = Visibility.Visible;
-            Arr.PreviewMouseDown += Arr_PreviewMouseDown;
-            StackPanelField.Children.Add(Arr);
-            */
             sections("Email", "txt");
             sections("Password", "txt");
             sections("FirstName", "txt");
@@ -134,12 +124,8 @@ namespace Chat_App
             Button btn = Buttons("Confirm", 14, Brushes.Black, Brushes.LightGray, CreateUser_Click);
             RegisterName("CreateUserBtn", btn);
             RegisteredNames.Add("CreateUserBtn");
-
             StackPanelField.Children.Add(btn);
-
-            //Next Step
         }
-
         private void Arr_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (StackPanelLabels.Visibility == Visibility.Visible)
@@ -154,7 +140,7 @@ namespace Chat_App
 
         public void sections(string content, string usage)
         {
-           // StackPanel sp = new StackPanel();
+            //Makes tetboxes / combobxes for create user function
             //Heading
             Label lb2 = Labels($"{content}", 11, FontStyles.Normal, Brushes.Transparent, Brushes.White, HorizontalAlignment.Center);
             //sp.Children.Add(lb2);
@@ -168,10 +154,7 @@ namespace Chat_App
                     txt.Style = this.FindResource("ControlBaseSpacing") as Style;
                     RegisterName($"{content}", txt);
                     RegisteredNames.Add(content);
-
-                   // sp.Children.Add(txt);
                     StackPanelField.Children.Add(txt);
-
                     break;
 
                 case "Gender":
@@ -179,15 +162,11 @@ namespace Chat_App
                     cb.Items.Add("Not Telling");
                     cb.Items.Add("Male");
                     cb.Items.Add("Female");
-                    cb.Items.Add("Other");
                     cb.SelectedIndex = 0;
                     cb.Style = this.FindResource("ControlBaseSpacing") as Style;
                     RegisterName($"{content}", cb);
                     RegisteredNames.Add(content);
-
-                    //    sp.Children.Add(cb);
                     StackPanelField.Children.Add(cb);
-
                     break;
 
                 case "Countries":
@@ -199,19 +178,15 @@ namespace Chat_App
                     cb2.Style = this.FindResource("ControlBaseSpacing") as Style;
                     RegisterName($"{content}", cb2);
                     RegisteredNames.Add(content);
-
-                    //    sp.Children.Add(cb2);
                     StackPanelField.Children.Add(cb2);
-
-                    break;
-
+                     break;
             }
-       //     StackPanelField.Children.Add(sp);
             ScrollView.Visibility = Visibility.Visible;
         }
 
         void ClearRegisteredNames()
         {
+            //clears custom names made from inside of the code on example textboxes to get their unique values from
             foreach (var item in RegisteredNames)
             {
                 UnregisterName(item);
@@ -220,9 +195,9 @@ namespace Chat_App
         }
         void CreateUser_Click(object sender, RoutedEventArgs e)
         {
-            //Json string for the new user
+            //Json string for the new user, by using unique registered names as values from example textboxes created in code
             string jsonStr = $"{{ " +
-                $"\"Email\"     : \"{(this.FindName("Email")     as TextBox).Text}\"," +
+                $"\"Email\"     : \"{(this.FindName("Email")     as TextBox).Text}\", " +
                 $"\"Password\"  : \"{(this.FindName("Password")  as TextBox).Text}\", " +
                 $"\"FirstName\" : \"{(this.FindName("FirstName") as TextBox).Text}\", " +
                 $"\"LastName\"  : \"{(this.FindName("LastName")  as TextBox).Text}\", " +
@@ -231,9 +206,10 @@ namespace Chat_App
                 $"\"City\"      : \"{(this.FindName("City")      as TextBox).Text}\", " +
                 $"\"Address\"   : \"{(this.FindName("Address")   as TextBox).Text}\", " +
                 $"\"JobTitle\"  : \"{(this.FindName("JobTitle")  as TextBox).Text}\", " +
-                $"\"Age\"       : \"{(this.FindName("Age")       as TextBox).Text}\" " +
+                $"\"UserType\"  : \"User\"                                          , " +
+                $"\"Age\"       : \"{(this.FindName("Age")       as TextBox).Text}\"  " +
                 $"}}";
-           
+            //Send api req to save user
             ApiSetup(jsonStr, "CreateUser");
         }
 
@@ -271,32 +247,16 @@ namespace Chat_App
             {
                 MessageBox.Show($"Error! You have been logged out of the system until {banTimer}!");
             }
-            else if (BanCheck() > DateTime.Now)
-            {
-                MessageBox.Show($"Error! You have been logged out of the system until {BanCheck()}!");
-            }
-            
             else
             {
-                ApiSetup($"{{ \"email\" : \"{username}\",\"match\" : \"{pw}\", \"id\" : \"0\", \"usage\" : \"login\"}}", "Login");
+                ApiSetup($"{{ \"email\" : \"{username}\",\"match\" : \"{pw}\", \"id\" : \"0\", \"usage\" : \"Login\"}}", "Login");
             }
         }
-        private static readonly HttpClient client = new HttpClient();
-
-        public DateTime BanCheck()
-        {
-             var jsonStr = new WebClient().DownloadString(($"https://localhost:44371/api/User/{username}"));
-             JObject Json = JObject.Parse(jsonStr);
-             return DateTime.Parse(Json.SelectToken("loginBan").ToString());
-        }
         
-
         public void ApiSetup(string content, string usage)
         {
             //Post request to send
-            
-            JObject json = JObject.Parse(content);
-            HttpWebRequest httpWebRequest;
+                        HttpWebRequest httpWebRequest;
             if (usage == "Login")
             {
                 httpWebRequest = (HttpWebRequest)WebRequest.Create("https://localhost:44371/api/User");
@@ -305,49 +265,55 @@ namespace Chat_App
             {
                 httpWebRequest = (HttpWebRequest)WebRequest.Create("https://localhost:44371/api/CreateUser");
             }
-            httpWebRequest.ContentType = "text/json";
-            httpWebRequest.Method = "POST";
-            //Sending the request
-            var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream());
-            streamWriter.Write(json);
-            streamWriter.Flush();
-            httpWebRequest.Timeout = 999999;
 
-            //Recieving the response
-            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-            Stream stream = httpResponse.GetResponseStream();
-            StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-            string responseString = reader.ReadToEnd();
-            reader.Close();
+            var stream = streamReader(content, httpWebRequest);
+            LoginResult Result;
             if (usage == "Login")
             {
-                if (responseString == "true")
-                {
-                    MainClient mainClient = new MainClient();
-                    mainClient.Show();
-                    WindowState = WindowState.Maximized;
-                    //this.Close();
-                    this.Hide();
-
-                    //Note Make a full screen function - maybe
-                }
-                else
-                {
-                    LoginLimit();
-                }
+                Result = JsonConvert.DeserializeObject<LoginResult>(stream.ReadToEnd());
             }
             else
             {
-                MessageBox.Show(responseString);
+                Result = new LoginResult(true, "User");
             }
-        }
+            stream.Close();
+                
+                if (Result.result && Result.userType == "Administrator")
+                {
+                    //Section used to determind if an Administrator user wishes to enter either the Admin panel or the chat application itself.
+                    Style style = new Style();
+                    style.Setters.Add(new Setter(Xceed.Wpf.Toolkit.MessageBox.YesButtonContentProperty, "Admin Panel"));
+                    style.Setters.Add(new Setter(Xceed.Wpf.Toolkit.MessageBox.NoButtonContentProperty, "Chat Application"));
+                    MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show("We've noticed you're using an administrator account, please pick which of the following you'd like to proceed to", "Confrim Section", MessageBoxButton.YesNo, MessageBoxImage.Information, style);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Admin_Panel panel = new Admin_Panel();
+                        panel.Show();
+                        panel.WindowState = WindowState.Maximized;
+                        this.Hide();
+                        return;
+                    }
+                }
+                if (Result.result)
+                {
+                    //Shows the clientside application
+                    MainClient mainClient = new MainClient();
+                    mainClient.Show();
+                    mainClient.WindowState = WindowState.Maximized;
+                    this.Hide();
+                }
+                else
+                {
+                    //Used for wrongfully entered passwords, if it exceeds 3, the application will block logintries for a given time
+                    LoginLimit();
+                }
+                    }
         public int logintries = 0;
         public int ban = 2;
         public DateTime banTimer;
         public void LoginLimit()
         {
-          
-
             logintries++;
             if (logintries < 3)
             {

@@ -6,6 +6,7 @@ namespace Chat_App.Methods
 {
    public class Logs
     {
+        //Method which shows the results of DB collection "Log" which is former chat history logs / elements / conversations / Picture base64
         public class chatListsMethod
         {
             public static readonly string Name = "Log";

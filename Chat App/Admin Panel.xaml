@@ -1,0 +1,118 @@
+﻿<Window x:Class="Chat_App.Admin_Panel"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Chat_App"
+        mc:Ignorable="d"
+        Title="Admin_Panel" Height="450" Width="800"
+        WindowState="Maximized">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="2*"/>
+
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="2*"/>
+            
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="2*"/>
+            
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="2*"/>
+
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="*"/>
+
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="*"/>
+
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="*"/>
+
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="*"/>
+
+
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Column="1" Grid.Row="1">
+            <Label Content="Select User" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18"/>
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Row="2" Grid.Column="1">
+            <TextBox x:Name="txtSelectUser" FontSize="16" TextChanged="txtSelectUser_TextChanged"/>
+        </Border>
+        <ScrollViewer FlowDirection="RightToLeft" Grid.Row="3" Grid.RowSpan="17" Grid.Column="1">
+            <StackPanel x:Name="SPUsers" FlowDirection="LeftToRight"/>
+        </ScrollViewer>
+        <Label Content="ID" Grid.Row="4" Grid.Column="3" FontSize="18"/>
+        <Label x:Name="LBID" Grid.Row="5" Grid.Column="3" FontSize="18"/>
+
+        
+        <Label Content="User Type" Grid.Row="7" Grid.Column="3" FontSize="18"/>
+        <ComboBox x:Name="CBUserType" Grid.Row="8" Grid.Column="3" FontSize="18"/>
+
+
+
+        <Label Content="Email" Grid.Row="10" Grid.Column="3" FontSize="18"/>
+        <TextBox x:Name="txtEmail" Grid.Row="11" Grid.Column="3" FontSize="18"/>
+
+        <Label Content="Password" Grid.Row="13" Grid.Column="3" FontSize="18"/>
+        <TextBox x:Name="txtPassword" Grid.Row="14" Grid.Column="3" FontSize="18"/>
+
+        <Label Content="Job Title" Grid.Row="16" Grid.Column="3" FontSize="18"/>
+        <TextBox x:Name="txtJobTitle" Grid.Row="17" Grid.Column="3" FontSize="18"/>
+
+        <Label Content="First Name" Grid.Row="7" Grid.Column="5" FontSize="18"/>
+        <TextBox x:Name="txtFirstName" Grid.Row="8" Grid.Column="5" FontSize="18"/>
+
+
+        <Label Content="Last Name" Grid.Row="10" Grid.Column="5" FontSize="18"/>
+        <TextBox x:Name="txtLastName" Grid.Row="11" Grid.Column="5" FontSize="18"/>
+
+        <Label Content="Country" Grid.Row="13" Grid.Column="5" FontSize="18"/>
+        <TextBox x:Name="txtCountry" Grid.Row="14" Grid.Column="5" FontSize="18"/>
+
+        <Label Content="City" Grid.Row="16" Grid.Column="5" FontSize="18"/>
+        <TextBox x:Name="txtCity" Grid.Row="17" Grid.Column="5" FontSize="18"/>
+
+        <Label Content="Address" Grid.Row="7" Grid.Column="7" FontSize="18"/>
+        <TextBox x:Name="txtAddress" Grid.Row="8" Grid.Column="7" FontSize="18"/>
+
+        <Label Content="Age" Grid.Row="10" Grid.Column="7" FontSize="18"/>
+        <TextBox Name="txtAge" Grid.Row="11" Grid.Column="7" FontSize="18"/>
+
+        <Label Content="Gender" Grid.Row="13" Grid.Column="7" FontSize="18"/>
+        <ComboBox x:Name="CBGender" Grid.Row="14" Grid.Column="7" FontSize="18"/>
+
+
+        <Label Content="Login Ban" Grid.Row="16" Grid.Column="7" FontSize="18"/>
+        <TextBox x:Name="txtLoginBan" Grid.Row="17" Grid.Column="7" FontSize="18"/>
+
+        <Button x:Name="btnLogOut" Content="Log Out" Grid.Column="1" Grid.Row="21" PreviewMouseDown="btnLogOut_PreviewMouseDown"/>
+
+        <Button x:Name="btnCreate" Content="Create New User" Grid.Column="9" Grid.Row="8" Click="btnCreate_Click" FontSize="18"/>
+        <Button x:Name="btnSave" Content="Save User Input" Grid.Column="9" Grid.Row="11" Click="btnSave_Click" FontSize="18"/>
+        <Button x:Name="btnReset" Content="Reset Input" Grid.Column="9" Grid.Row="14" Click="btnReset_Click" FontSize="18"/>
+        <Button x:Name="btnDelete" Content="Delete User" Grid.Column="9" Grid.Row="17" Click="btnDelete_Click" FontSize="18"/>
+    </Grid>
+</Window>

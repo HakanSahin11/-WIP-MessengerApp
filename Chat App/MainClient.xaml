@@ -46,6 +46,11 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
         <Image Stretch="Fill" Source="C:\Users\hakan\OneDrive\Billeder/Bjerg.jpg" Grid.Column="0" Grid.ColumnSpan="20" Grid.Row="0" Grid.RowSpan="20"/>
@@ -66,7 +71,7 @@
             </StackPanel>
         </Border>
 
-        <Border BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="1" Grid.ColumnSpan="12" Margin="10,0,10,10">
+        <Border BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="1" Grid.ColumnSpan="17" Margin="10,0,10,10">
             <ScrollViewer x:Name="scrollViewer" HorizontalScrollBarVisibility="Auto" CanContentScroll="True" Visibility="Collapsed">
                 <StackPanel Name="StackPanelfield">
                     <StackPanel.Resources>
@@ -77,14 +82,18 @@
                 </StackPanel>
             </ScrollViewer>
         </Border>
-        <TextBox Text="Enter your message" x:Name="txtUserMessage"  TextWrapping="Wrap" PreviewKeyDown="txtUserMessageSend_PreviewKeyDown" PreviewMouseDown="txtUserMessage_PreviewMouseDown" FontStyle="Italic" Grid.Row="18" Grid.Column="1" Grid.ColumnSpan="11" Margin="10,0,2,10"/>
-        <Button x:Name="sendMessage" Content="Send" Grid.Row="18" Grid.Column="12" Margin="0,0,10,10" Click="sendMessage_Click"/>
-        <Border x:Name="stackPanelBorder" BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="17" Margin="10,0,10,10">
+        <Button x:Name="btnImage" Grid.Row="18" Grid.Column="1" Margin="10,0,0,10" Click="btnImage_Click">
+            <Image Source="C:\Users\hakan\OneDrive\Billeder\AddImage.png"/>
+            
+        </Button>
+        <TextBox Text="Enter your message" x:Name="txtUserMessage"  TextWrapping="Wrap" PreviewKeyDown="txtUserMessageSend_PreviewKeyDown" PreviewMouseDown="txtUserMessage_PreviewMouseDown" FontStyle="Italic" Grid.Row="18" Grid.Column="2" Grid.ColumnSpan="14" Margin="5,0,5,10"/>
+        <Button x:Name="sendMessage" Content="Send" Grid.Row="18" Grid.Column="16" Grid.ColumnSpan="2" Margin="0,0,10,10" Click="sendMessage_Click"/>
+        <Border x:Name="stackPanelBorder" BorderBrush="White" BorderThickness="1" Grid.Row="2" Grid.RowSpan="16" Grid.Column="18" Margin="10,0,10,10">
             <StackPanel x:Name="stackPanelFriendsList">
                 <Label Content="Add userinformation here"/>
                 <Separator/>
             </StackPanel>
         </Border>
-        <StackPanel Grid.Column="5" Grid.Row="19"/>
+        <StackPanel Grid.Column="7" Grid.Row="19"/>
     </Grid>
 </Window>

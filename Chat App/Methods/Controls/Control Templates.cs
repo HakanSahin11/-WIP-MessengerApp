@@ -10,6 +10,7 @@ namespace Chat_App.Methods
 {
     class labels
     {
+        //Templat for creation of control elements as Texboxes, comboboxes, etc
         public static Label Labels(string message, int size, FontStyle font, Brush background, Brush foreground, HorizontalAlignment textAlignment)
         {
             Label label = new Label();
