@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Bjerg.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <COMReference Include="{d37e2a3e-8545-3a39-9f4f-31827c9124ab}">
       <Guid>d37e2a3e-8545-3a39-9f4f-31827c9124ab</Guid>
       <VersionMajor>2</VersionMajor>
@@ -24,6 +28,12 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="WPFCustomMessageBox" Version="1.0.7" />
     <PackageReference Include="WPFTextBoxAutoComplete" Version="1.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Bjerg.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>
