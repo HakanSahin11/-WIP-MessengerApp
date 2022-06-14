@@ -53,7 +53,7 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
-        <Image Stretch="Fill" Source="C:\Users\hakan\OneDrive\Billeder/Bjerg.jpg" Grid.Column="0" Grid.ColumnSpan="20" Grid.Row="0" Grid.RowSpan="20"/>
+        <Image Stretch="Fill" Source="\Bjerg.jpg" Grid.Column="0" Grid.ColumnSpan="20" Grid.Row="0" Grid.RowSpan="20"/>
 
 
         <Button x:Name="BtnLogout" Content="Sign Out" HorizontalContentAlignment="Center" Grid.Row="20"  Margin="10,10,15,10"  Grid.Column="0"/>

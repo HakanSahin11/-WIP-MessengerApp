@@ -44,7 +44,7 @@
         </Grid.RowDefinitions>
 
 
-            <Image Margin="0,-17,0,0" Grid.RowSpan="21" Stretch="Fill" Source="C:\Users\hakan\OneDrive\Billeder/Bjerg.jpg" Grid.ColumnSpan="11"/>
+            <Image Margin="0,-17,0,0" Grid.RowSpan="21" Stretch="Fill" Source="\Bjerg.jpg" Grid.ColumnSpan="11"/>
             <StackPanel x:Name="StackPanelLabels" Visibility="Visible" Grid.Row="3" Grid.RowSpan="7" Grid.Column="3"/>
             <StackPanel Grid.Row="2" Grid.Column="4">
                 <Grid>
